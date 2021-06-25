@@ -1,8 +1,5 @@
 import './App.css';
-//import Person from './components/Person/Person'
-import PeopleList from './components/Person/PeopleList'
-
-
+import PeopleList from './components/Person/PeopleList';
 
 function App() {
   return (
