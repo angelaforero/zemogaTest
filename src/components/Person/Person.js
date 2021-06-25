@@ -1,14 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import ThumbUpIcon from '../../assets/icons/thumbUpIcon.png';
 import ThumbDownAltIcon from '../../assets/icons/thumbDownIcon.png';
-import personData from '../../assets/data.json';
-import kanye from '../../assets/peopleImg/kanye.png';
 import Typography from '@material-ui/core/Typography';
+import PropTypes from 'prop-types';
 
 const useStyles = makeStyles (theme => ({
   root: {
@@ -49,53 +47,112 @@ const useStyles = makeStyles (theme => ({
     background: 'rgba(60, 187, 180, 0.8)',
     margin: 5,
   },
-  voteButton:{
+  voteButton: {
     background: 'rgba(0, 0, 0, 0.6)',
     border: '1px solid #FFFFFF',
-    boxSizing: 'border-box'
-  }
+    boxSizing: 'border-box',
+  },
+  appBar: {
+    top: 'auto',
+    bottom: 0,
+  },
+  whiteColor: {
+    color: '#ffffff',
+  },
 }));
 
-const styles = {
-  paperContainer: {
-    backgroundImage: `url(${kanye})`,
-    width: 300,
-    height: 300,
-    backgroundSize: 'cover',
-  },
-};
-
-function Person () {
+const Person = props => {
   const classes = useStyles ();
+  const [thumb, setThumb] = useState ('');
   const [positiveVote, setPositiveVote] = useState ('');
   const [negativeVote, setNegativeVote] = useState ('');
   const [showVote, _setShowVote] = useState (false);
   const [msg, setmsg] = useState ('');
+  const [voteButtonText, setVoteButtonText] = useState ('Vote Now!');
 
   useEffect (() => {
-    percentageCalculation();
-    voteMsg();
+    percentageCalculation ();
+    voteMsg ();
   }, []);
 
   const percentageCalculation = () => {
-    let totalCuantity =
-      personData.data[0].votes.positive + personData.data[0].votes.negative;
-    setPositiveVote (Math.round(personData.data[0].votes.positive * 100 / totalCuantity)+'%');
-    setNegativeVote (Math.round(personData.data[0].votes.negative * 100 / totalCuantity)+'%');
+    let totalCuantity = props.data.votes.positive + props.data.votes.negative;
+    setPositiveVote (
+      Math.round (props.data.votes.positive * 100 / totalCuantity) + '%'
+    );
+    setNegativeVote (
+      Math.round (props.data.votes.negative * 100 / totalCuantity) + '%'
+    );
   };
 
   const voteMsg = val => {
     if (val === 'Up') {
+      setVoteButtonText('Vote Again');
       setmsg ('Thank you for your vote!');
     } else {
-      setmsg ('1 month ago in ' + personData.data[0].cate);
+      setmsg ('1 month ago in ' + props.data.cate);
     }
   };
 
+  const descriptionToShow = props.data.description.substring (0, 60) + '...';
+
+  const nameToShow = props.data.name.substring (0, 20) + '...';
+
   return (
-    <Paper style={styles.paperContainer}>
+    <div
+      style={{
+        backgroundImage: `url('/peopleImg/${props.data.picture}')`,
+        width: 300,
+        height: 300,
+        backgroundSize: 'cover',
+        position: 'relative',
+      }}
+    >
+      <div
+        style={{
+          position: 'sticky',
+          top: '70%',
+        }}
+      >
+        <Grid container direction="row">
+          <Box
+            width={positiveVote}
+            height="15%"
+            display="flex"
+            style={{
+              backgroundColor: `rgba(60, 187, 180, 0.6)`,
+              textAlign: 'left',
+            }}
+          >
+            <img src={ThumbUpIcon} width="16px" height="16px" alt="ThumbUp" />
+            <Typography className={classes.whiteColor} variant="h4">
+              {positiveVote}
+            </Typography>
+          </Box>
+          <Box
+            width={negativeVote}
+            height="15%"
+            display="flex"
+            style={{
+              backgroundColor: `rgba(249, 173, 29, 0.6)`,
+              textAlign: 'right',
+            }}
+          >
+            <img
+              src={ThumbDownAltIcon}
+              width="16px"
+              height="16px"
+              alt="ThumbDown"
+            />
+            <Typography className={classes.whiteColor} variant="h4">
+              {negativeVote}
+            </Typography>
+          </Box>
+        </Grid>
+
+      </div>
+
       <Grid container>
-        {/*   <img src={kanye} /> */}
         <Grid container>
           <Grid item xs={3}>
             {showVote === true
@@ -103,17 +160,29 @@ function Person () {
                   m={2}
                   size="small"
                   variant="contained"
-                  className={classes.buttonUp}
-                  startIcon={<img src={ThumbUpIcon} alt="ThumbUp" />}
+                  className={
+                    thumb === 'Up' ? classes.buttonUp : classes.buttonDown
+                  }
+                  onClick={() => {
+                    setThumb ('Up');
+                  }}
+                  startIcon={
+                    <img
+                      src={thumb === 'Up' ? ThumbUpIcon : ThumbDownAltIcon}
+                      width="16px"
+                      height="16px"
+                      alt="ThumbUp"
+                    />
+                  }
                 />
               : ''}
 
           </Grid>
           <Grid item xs={9}>
             <Grid item xs={12}>
-              <h1 className={classes.title}>{personData.data[0].name}</h1>
+              <h1 className={classes.title}>{nameToShow}</h1>
               <h4 className={classes.subtitle}>
-                {' '}{personData.data[0].description}
+                {' '}{descriptionToShow}
               </h4>
               <p className={classes.msg}>
                 {msg}
@@ -127,54 +196,57 @@ function Person () {
                 size="small"
                 variant="contained"
                 className={classes.buttonUp}
-                startIcon={<img src={ThumbUpIcon} alt="ThumbUp" />}
+                onClick={() => {
+                  setThumb ('Up');
+                }}
+                startIcon={
+                  <img
+                    src={ThumbUpIcon}
+                    width="16px"
+                    height="16px"
+                    alt="ThumbUp"
+                  />
+                }
               />
               <Button
                 m={2}
                 size="small"
                 variant="contained"
                 className={classes.buttonDown}
-                startIcon={<img src={ThumbDownAltIcon} alt="ThumbDown" />}
+                onClick={() => {
+                  setThumb ('Down');
+                }}
+                startIcon={
+                  <img
+                    src={ThumbDownAltIcon}
+                    width="16px"
+                    height="16px"
+                    alt="ThumbDown"
+                  />
+                }
               />
               <Button
                 mb={2}
                 variant="outlined"
-                className={classes.voteButton}
+                className={` ${classes.voteButton} ${classes.whiteColor}`}
                 onClick={() => {
                   voteMsg ('Up');
                   _setShowVote (true);
                 }}
               >
-                Vote Now!
+                {voteButtonText}
               </Button>
             </Grid>
           </Grid>
-          <Box
-            width= {positiveVote}
-            height="15%"
-            display="flex"
-            style={{backgroundColor: '#3CBBB4', textAlign: 'left'}}
-          >
-            <img src={ThumbUpIcon} alt="ThumbUp" /><Typography variant="h4">
-              {positiveVote}
-            </Typography>
-          </Box>
-          <Box
-            width= {negativeVote}
-            height="15%"
-            display="flex"
-            style={{backgroundColor: '#F9AD1D', textAlign: 'right'}}
-          >
-            <img src={ThumbDownAltIcon} alt="ThumbDown" />
-            <Typography variant="h4">
-              {negativeVote}
-            </Typography>
-          </Box>
 
         </Grid>
       </Grid>
-    </Paper>
+    </div>
   );
-}
+};
+
+Person.propTypes = {
+  data: PropTypes.any.isRequired,
+};
 
 export default Person;
